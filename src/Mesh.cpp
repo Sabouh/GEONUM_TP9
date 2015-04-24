@@ -176,6 +176,7 @@ unsigned int edges_common_face(unsigned int i_e0, unsigned int i_e1, vector< vec
     return 0;
 }
 
+
 unsigned int vertices_common_face(unsigned int i0, unsigned int i1, unsigned int i2, vector< vector<unsigned int> > vert_faces)
 {
     // for all faces adjacent to vertex i0
@@ -239,12 +240,12 @@ vec3 Mesh::deplacement(unsigned int sommet ,vec3 S,vector<vec3> listefsi,vector<
 
         vector< vector< unsigned int > > listeEdge=get_vertex_edges(voisins,aretes);
         vector<unsigned int> face=facesAdjacentes.at(sommet);
-//        vector<vec3> listSFI;
-//        for(int j=0;j<face.size();j++){
-//            int ii=(int)face.at(j);
-//            listSFI.push_back(ii);
-//        }
-            vec3 resultF=calculerBarycentreTetra(listefsi);
+        vector<vec3> listSFI;
+        for(int j=0;j<face.size();j++){
+            int ii=(int)face.at(j);
+            listSFI.push_back(listefsi.at(ii));
+        }
+            vec3 resultF=calculerBarycentreTetra(listSFI);
 
 
         vector< unsigned int > listEd=listeEdge.at(sommet);
