@@ -204,7 +204,7 @@ unsigned int vertices_common_face(unsigned int i0, unsigned int i1, unsigned int
     return 0;
 }
 
-vec3 Mesh::calculerBarycentreFace(vector< unsigned int > f){
+vec3 Mesh::calculerBarycentreFace(vector< unsigned int > f) const{
    vec3 barycentre = vec3(0.0,0.0,0.0);
    vec3 tmp;
     for(int i=0;i<f.size();i++){
@@ -214,19 +214,79 @@ vec3 Mesh::calculerBarycentreFace(vector< unsigned int > f){
     return barycentre;
 }
 
+vec3 Mesh::calculerBarycentreTetra(vector< vec3 > f) const{
+   vec3 barycentre = vec3((float)0,(float)0,(float)0);
+   vec3 tmp;
+    for(int i=0;i<f.size();i++){
+       tmp = f.at(i);
+       barycentre = vec3(barycentre.x+(tmp.x/f.size()),barycentre.y+(tmp.y/f.size()),barycentre.z+(tmp.z/f.size()));
+    }
+    return barycentre;
+}
+
+vec3 Mesh::deplacement(unsigned int sommet , vec3 S)const{
+//    for(int i=0;i<vertices.size();i++){
+//        som=
+//    }
+       unsigned int n= vertices.size();
+      vector< Edge > edges= get_edges();
+      //liste des arcs adjacentes
+      vector< vector< unsigned int > > edgesAdjacentes=get_vertex_edges (edges) ;
+      //listes des faces adjacentes
+      vector< vector< unsigned int > >  facesAdjacentes = get_vertex_faces();
+      //liste arcs adjacents du sommet d'indice sommet
+        vector<unsigned int> arcs=edgesAdjacentes.at(sommet);
+        //liste faces adjacentes du sommet
+        vector<unsigned int> face=facesAdjacentes.at(sommet);
+        vec3 resultF=barycentreSfi(face);
+        vec3 resultA=barycentreSai(arcs);
+        //calcul de A*2
+        vec3 resultA_2=vec3(resultA.at(0)*2,resultA.at(1)*2,resultA.at(2)*2);
+        //calcul de (n-3)*S
+        vec3 S_n_1=vec3(S.at(0)*(n-1),S.at(1)*(n-1),S.at(2)*(n-1));
+        //calcul du résultat snouv
+        double v1=(resultF.at(0)+2*resultA_2.at(0)+S_n_1.at(0))/2;
+        double v2=(resultF.at(1)+2*resultA_2.at(1)+S_n_1.at(1))/2;
+        double v3=(resultF.at(2)+2*resultA_2.at(2)+S_n_1.at(2))/2;
+        vec3 newS=vec3(v1,v2,v3);
+
+  cout << "valeur de facesAdjacentes est " << facesAdjacentes.at(0).at(2) << endl;
+        return newS;
+}
+
 Mesh Mesh::subdivide() const
 {
     Mesh output;
     //Calcul barycentre Sf de chaque face
-    vec3 b;
-    for(int i=0;i<faces.size();i++){
-            b= calculerBarycentreFace(faces.at(i));
+    vector<vec3 > b;
+     for(int i=0;i<faces.size();i++){
+            b.assign(i,calculerBarycentreFace(get_face(i)));
     }
 
     //Calcul de Sa pour chaque arête a
 
+     vector<Edge > aretes = get_edges();
+     vector <vector < unsigned int > > faces_voisines = get_edge_faces(aretes);
+     vector<vec3 > tetra;
+     vector<vec3 > bt;
+     vec3 res;
+
+     for(int i=0;i<faces_voisines.size();i++){
+         /*Extremites de l'arête*/
+         tetra.push_back(get_vertex(aretes.at(i).m_i0));
+         tetra.push_back(get_vertex(aretes.at(i).m_i1));
+         for(int j=0;j<faces_voisines.at(i).size();j++){
+             /*faces adjacentes*/
+             tetra.push_back(b.at(faces_voisines.at(i).at(j)));
+         }
+         res = calculerBarycentreTetra(tetra);
+         bt.push_back(res);
+         tetra.empty();
+     }
+
     //Deplacement de S
 
+    deplacement();
     //Formation des faces
 
     //=======================================================
