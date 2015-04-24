@@ -224,35 +224,44 @@ vec3 Mesh::calculerBarycentreTetra(vector< vec3 > f) const{
     return barycentre;
 }
 
-vec3 Mesh::deplacement(unsigned int sommet , vec3 S)const{
-//    for(int i=0;i<vertices.size();i++){
-//        som=
-//    }
+vec3 Mesh::deplacement(unsigned int sommet ,vec3 S,vector<vec3> listefsi,vector<vec3>listeSai) const {
+
        unsigned int n= vertices.size();
       vector< Edge > edges= get_edges();
-      //liste des arcs adjacentes
+       //
       vector< vector< unsigned int > > edgesAdjacentes=get_vertex_edges (edges) ;
-      //listes des faces adjacentes
+
       vector< vector< unsigned int > >  facesAdjacentes = get_vertex_faces();
-      //liste arcs adjacents du sommet d'indice sommet
-        vector<unsigned int> arcs=edgesAdjacentes.at(sommet);
-        //liste faces adjacentes du sommet
+
+     vector< Edge >  aretes=get_edges();
+     vector< vector<unsigned int> > voisins=get_neighborhoods();
+
+        vector< vector< unsigned int > > listeEdge=get_vertex_edges(voisins,aretes);
         vector<unsigned int> face=facesAdjacentes.at(sommet);
-        vec3 resultF=barycentreSfi(face);
-        vec3 resultA=barycentreSai(arcs);
+//        vector<vec3> listSFI;
+//        for(int j=0;j<face.size();j++){
+//            int ii=(int)face.at(j);
+//            listSFI.push_back(ii);
+//        }
+            vec3 resultF=calculerBarycentreTetra(listefsi);
+
+
+        vector< unsigned int > listEd=listeEdge.at(sommet);
+        vec3 resultA=calculerBarycentreTetra(listeSai);
         //calcul de A*2
-        vec3 resultA_2=vec3(resultA.at(0)*2,resultA.at(1)*2,resultA.at(2)*2);
+
+        vec3 resultA_2=vec3(resultA.x*2,resultA.y*2,resultA.z*2);
         //calcul de (n-3)*S
-        vec3 S_n_1=vec3(S.at(0)*(n-1),S.at(1)*(n-1),S.at(2)*(n-1));
+        vec3 S_n_1=vec3(S.x*(n-1),S.y*(n-1),S.z*(n-1));
         //calcul du résultat snouv
-        double v1=(resultF.at(0)+2*resultA_2.at(0)+S_n_1.at(0))/2;
-        double v2=(resultF.at(1)+2*resultA_2.at(1)+S_n_1.at(1))/2;
-        double v3=(resultF.at(2)+2*resultA_2.at(2)+S_n_1.at(2))/2;
+        float v1=(resultF.x+2*resultA_2.x+S_n_1.x)/2;
+        float v2=(resultF.y+2*resultA_2.y+S_n_1.y)/2;
+        float v3=(resultF.z+2*resultA_2.z+S_n_1.z)/2;
         vec3 newS=vec3(v1,v2,v3);
 
-  cout << "valeur de facesAdjacentes est " << facesAdjacentes.at(0).at(2) << endl;
         return newS;
 }
+
 
 Mesh Mesh::subdivide() const
 {
@@ -286,7 +295,7 @@ Mesh Mesh::subdivide() const
 
     //Deplacement de S
 
-    deplacement();
+//    deplacement();
     //Formation des faces
 
     //=======================================================
@@ -313,7 +322,7 @@ vector< vector<unsigned int> > Mesh::get_neighborhoods() const
     for(unsigned int i = 0; i < vertices.size(); i++)
     {
         output.push_back(vector< unsigned int >());
-    }
+    } vector<vec3> result;
     
     
     // unordered neighborhood computation
@@ -400,7 +409,7 @@ vector< vector< unsigned int > > Mesh::get_vertex_faces() const
     {
         vector< unsigned int > f = get_face(i);
         
-        // for all composing vertices
+        // for all composing verticesvec3 Mesh::deplacement(unsigned int sommet , vec3 S,vector<vec3> listefsi,vector<vec3>listeSai)
         for(unsigned int j=0; j < f.size(); j++)
         {
             // add self as incident
