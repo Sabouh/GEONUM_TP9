@@ -224,7 +224,7 @@ vec3 Mesh::calculerBarycentreTetra(vector< vec3 > f) const{
     return barycentre;
 }
 
-vec3 Mesh::deplacement(unsigned int sommet , vec3 S)const{
+vec3 Mesh::deplacement(unsigned int sommet , vec3 S) const{
 //    for(int i=0;i<vertices.size();i++){
 //        som=
 //    }
@@ -258,9 +258,9 @@ Mesh Mesh::subdivide() const
 {
     Mesh output;
     //Calcul barycentre Sf de chaque face
-    vector<vec3 > b;
+    vector<vec3 > sf;
      for(int i=0;i<faces.size();i++){
-            b.assign(i,calculerBarycentreFace(get_face(i)));
+            sf.assign(i,calculerBarycentreFace(get_face(i)));
     }
 
     //Calcul de Sa pour chaque arête a
@@ -268,8 +268,7 @@ Mesh Mesh::subdivide() const
      vector<Edge > aretes = get_edges();
      vector <vector < unsigned int > > faces_voisines = get_edge_faces(aretes);
      vector<vec3 > tetra;
-     vector<vec3 > bt;
-     vec3 res;
+     vector<vec3 > sa;
 
      for(int i=0;i<faces_voisines.size();i++){
          /*Extremites de l'arête*/
@@ -277,17 +276,36 @@ Mesh Mesh::subdivide() const
          tetra.push_back(get_vertex(aretes.at(i).m_i1));
          for(int j=0;j<faces_voisines.at(i).size();j++){
              /*faces adjacentes*/
-             tetra.push_back(b.at(faces_voisines.at(i).at(j)));
+             tetra.push_back(sf.at(faces_voisines.at(i).at(j)));
          }
-         res = calculerBarycentreTetra(tetra);
-         bt.push_back(res);
+         sa.assign(i,calculerBarycentreTetra(tetra));
          tetra.empty();
      }
 
     //Deplacement de S
+     vector <vec3 > sommets;
+     for(int i=0;i<vertices.size();i++){
+         sommets.assign(i,deplacement(i,vertices.at(i)));
 
-    deplacement();
+     }
+
     //Formation des faces
+
+    vector<unsigned int > v;
+    for(int i=0;i<sommets.size();i++){
+        output.vertices.assign((4*i)+1,sommets.at(i));//s
+        output.vertices.assign((4*i)+2,sa.at(i));//sai
+        output.vertices.assign((4*i)+3,sf.at(i)); //sfi
+        output. vertices.assign((4*i)+4,sa.at((i+1)%sommets.size())); //sai+1
+        v.push_back((unsigned int)((4*i)+1));
+        v.push_back((unsigned int)((4*i)+2));
+        v.push_back((unsigned int)((4*i)+3));
+        v.push_back((unsigned int)((4*i)+4));
+        output.faces.assign(i,v); //f s sai sfi sai+1
+        v.empty();
+    }
+
+
 
     //=======================================================
     //
