@@ -205,11 +205,11 @@ unsigned int vertices_common_face(unsigned int i0, unsigned int i1, unsigned int
     return 0;
 }
 
-vec3 Mesh::calculerBarycentreFace(vector< unsigned int > f) const{
+vec3 Mesh::calculerBarycentreFace(const vector< unsigned int > f) const{
    vec3 barycentre = vec3(0.0,0.0,0.0);
    vec3 tmp;
     for(int i=0;i<f.size();i++){
-       tmp = vertices.at(f.at(i));
+       tmp = get_vertex(f.at(i));
        barycentre = vec3(barycentre.x+(tmp.x/f.size()),barycentre.y+(tmp.y/f.size()),barycentre.z+(tmp.z/f.size()));
     }
     return barycentre;
@@ -270,11 +270,25 @@ Mesh Mesh::subdivide() const
     Mesh output;
     //Calcul barycentre Sf de chaque face
     vector<vec3 > sf;
-
+    vec3 b;
+    vector<unsigned int> f;
     cout << "debut SF"<<endl;
+    cout << faces.size() << endl;
      for(int i=0;i<faces.size();i++){
-            sf.assign(i,calculerBarycentreFace(get_face(i)));
+            cout<<get_face(i).size()<<endl;
+            cout << get_face(i).at(0)<<" "<< get_face(i).at(1)<<" "<< get_face(i).at(2)<<" " << get_face(i).at(3) << endl;
+            vec3 aze = vec3(0,0,0);
+            for (int j = 0; j < get_face(i).size(); j++) {
+                aze += get_face(i).at(j);
+            }
+            aze /= get_face(i).size();
+            int x = aze.x;
+            int y = aze.y;
+            int z = aze.z;
+           sf.push_back(vec3(x,y,z));
+            //sf.push_back(calculerBarycentreFace(get_face(i)));
     }
+     cout<<sf.size()<<endl;
     cout << "fin SF"<<endl;
     //Calcul de Sa pour chaque arête a
 
@@ -292,37 +306,46 @@ Mesh Mesh::subdivide() const
          for(int j=0;j<faces_voisines.at(i).size();j++){
              /*faces adjacentes*/
              tetra.push_back(sf.at(faces_voisines.at(i).at(j)));
-             cout<<faces_voisines.at(i).at(j)<<endl;
          }
-         sa.assign(i,calculerBarycentreTetra(tetra));
-         tetra.empty();
+         sa.push_back(calculerBarycentreTetra(tetra));
+         tetra.clear();
      }
      cout << "debut deplacement"<<endl;
+
     //Deplacement de S
      vector <vec3 > sommets;
      for(int i=0;i<vertices.size();i++){
-         sommets.assign(i,deplacement(i,vertices.at(i),sf,sa));
+         sommets.push_back(deplacement(i,vertices.at(i),sf,sa));
 
      }
      cout << "fin deplacement"<<endl;
 
     //Formation des faces
 
+     for(int i=0;i<sommets.size();i++){
+        cout << sommets.at(i).x <<" "<<sommets.at(i).y <<" "<<sommets.at(i).z <<endl;
+     }
+     cout<<"FIN SOMMETS"<<endl;
+
     vector<unsigned int > v;
     for(int i=0;i<sommets.size();i++){
-        output.vertices.assign((4*i)+1,sommets.at(i));//s
-        output.vertices.assign((4*i)+2,sa.at(i));//sai
-        output.vertices.assign((4*i)+3,sf.at(i)); //sfi
-        output. vertices.assign((4*i)+4,sa.at((i+1)%sommets.size())); //sai+1
+        output.vertices.push_back(sommets.at(i));//s
+        output.vertices.push_back(sa.at(i));//sai
+        output.vertices.push_back(sf.at(i)); //sfi
+        output. vertices.push_back(sa.at((i+1)%sommets.size())); //sai+1
         v.push_back((unsigned int)((4*i)+1));
         v.push_back((unsigned int)((4*i)+2));
         v.push_back((unsigned int)((4*i)+3));
         v.push_back((unsigned int)((4*i)+4));
-        output.faces.assign(i,v); //f s sai sfi sai+1
-        v.empty();
+        output.faces.push_back(v); //f s sai sfi sai+1
+        v.clear();
     }
     cout << "fin formation faces"<<endl;
+    for(int i=0;i<output.vertices.size();i++){
+        cout << i<<endl;
+       cout << output.vertices.at(i).x << " "<< output.vertices.at(i).y << " "<< output.vertices.at(i).z << endl;
 
+    }
 
 
     //=======================================================
@@ -333,16 +356,8 @@ Mesh Mesh::subdivide() const
 
 
     
-    output = *this;     // place holder : current mesh copy
-    vector<vec3> listeres;
-    for(int i=0;i<vertices.size();i++){
-       listeres.push_back(deplacement(i,vertices.at(i),bt,tetra));
-    }
-    
+   // output = *this;     // place holder : current mesh copy
 
-    //vertices=listeres;
-    output.vertices=listeres;
-    
     return output;
 }
 
