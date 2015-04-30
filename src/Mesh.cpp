@@ -330,13 +330,18 @@ Mesh Mesh::subdivide() const
     // TODO : implémenter le schema de subdivision de Catmull-Clark
     //
     //=======================================================
+
+
     
     output = *this;     // place holder : current mesh copy
+    vector<vec3> listeres;
+    for(int i=0;i<vertices.size();i++){
+       listeres.push_back(deplacement(i,vertices.at(i),bt,tetra));
+    }
     
-    
-    
-    
-    
+
+    //vertices=listeres;
+    output.vertices=listeres;
     
     return output;
 }
