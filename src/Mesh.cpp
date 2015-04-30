@@ -270,10 +270,12 @@ Mesh Mesh::subdivide() const
     Mesh output;
     //Calcul barycentre Sf de chaque face
     vector<vec3 > sf;
+
+    cout << "debut SF"<<endl;
      for(int i=0;i<faces.size();i++){
             sf.assign(i,calculerBarycentreFace(get_face(i)));
     }
-
+    cout << "fin SF"<<endl;
     //Calcul de Sa pour chaque arête a
 
      vector<Edge > aretes = get_edges();
@@ -281,6 +283,8 @@ Mesh Mesh::subdivide() const
      vector<vec3 > tetra;
      vector<vec3 > sa;
 
+
+     cout << "debut SA"<<endl;
      for(int i=0;i<faces_voisines.size();i++){
          /*Extremites de l'arête*/
          tetra.push_back(get_vertex(aretes.at(i).m_i0));
@@ -288,17 +292,19 @@ Mesh Mesh::subdivide() const
          for(int j=0;j<faces_voisines.at(i).size();j++){
              /*faces adjacentes*/
              tetra.push_back(sf.at(faces_voisines.at(i).at(j)));
+             cout<<faces_voisines.at(i).at(j)<<endl;
          }
          sa.assign(i,calculerBarycentreTetra(tetra));
          tetra.empty();
      }
-
+     cout << "debut deplacement"<<endl;
     //Deplacement de S
      vector <vec3 > sommets;
      for(int i=0;i<vertices.size();i++){
          sommets.assign(i,deplacement(i,vertices.at(i),sf,sa));
 
      }
+     cout << "fin deplacement"<<endl;
 
     //Formation des faces
 
@@ -315,6 +321,7 @@ Mesh Mesh::subdivide() const
         output.faces.assign(i,v); //f s sai sfi sai+1
         v.empty();
     }
+    cout << "fin formation faces"<<endl;
 
 
 
