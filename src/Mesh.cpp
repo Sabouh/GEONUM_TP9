@@ -205,11 +205,11 @@ unsigned int vertices_common_face(unsigned int i0, unsigned int i1, unsigned int
     return 0;
 }
 
-vec3 Mesh::calculerBarycentreFace(vector< unsigned int > f) const{
+vec3 Mesh::calculerBarycentreFace(const vector< unsigned int > f) const{
    vec3 barycentre = vec3(0.0,0.0,0.0);
    vec3 tmp;
     for(int i=0;i<f.size();i++){
-       tmp = vertices.at(f.at(i));
+       tmp = get_vertex(f.at(i));
        barycentre = vec3(barycentre.x+(tmp.x/f.size()),barycentre.y+(tmp.y/f.size()),barycentre.z+(tmp.z/f.size()));
     }
     return barycentre;
@@ -226,8 +226,11 @@ vec3 Mesh::calculerBarycentreTetra(vector< vec3 > f) const{
 }
 
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 06854ca6dba0f6a3476c8b2e85fb5fe343c7caa8
 vec3 Mesh::deplacement(unsigned int sommet ,vec3 S,vector<vec3> listefsi,vector<vec3>listeSai) const {
 
        unsigned int n= vertices.size();
@@ -317,29 +320,52 @@ Mesh Mesh::subdivide() const
 {
     Mesh output;
     //Calcul barycentre Sf de chaque face
-    vector<vec3 > b;
+    vector<vec3 > sf;
+    vec3 b;
+    vector<unsigned int> f;
+    cout << "debut SF"<<endl;
+    cout << faces.size() << endl;
      for(int i=0;i<faces.size();i++){
-            b.assign(i,calculerBarycentreFace(get_face(i)));
+            cout<<get_face(i).size()<<endl;
+            cout << get_face(i).at(0)<<" "<< get_face(i).at(1)<<" "<< get_face(i).at(2)<<" " << get_face(i).at(3) << endl;
+            vec3 aze = vec3(0,0,0);
+            for (int j = 0; j < get_face(i).size(); j++) {
+                aze += get_face(i).at(j);
+            }
+            aze /= get_face(i).size();
+            int x = aze.x;
+            int y = aze.y;
+            int z = aze.z;
+           sf.push_back(vec3(x,y,z));
+            //sf.push_back(calculerBarycentreFace(get_face(i)));
     }
-
+     cout<<sf.size()<<endl;
+    cout << "fin SF"<<endl;
     //Calcul de Sa pour chaque arête a
 
      vector<Edge > aretes = get_edges();
      vector <vector < unsigned int > > faces_voisines = get_edge_faces(aretes);
      vector<vec3 > tetra;
+<<<<<<< HEAD
      vector<vec3 > bt;
      vec3 res;
      //nouveau liste de sommets pour output
      vector<vec3> SommetsDeplaces;
+=======
+     vector<vec3 > sa;
 
+>>>>>>> 06854ca6dba0f6a3476c8b2e85fb5fe343c7caa8
+
+     cout << "debut SA"<<endl;
      for(int i=0;i<faces_voisines.size();i++){
          /*Extremites de l'arête*/
          tetra.push_back(get_vertex(aretes.at(i).m_i0));
          tetra.push_back(get_vertex(aretes.at(i).m_i1));
          for(int j=0;j<faces_voisines.at(i).size();j++){
              /*faces adjacentes*/
-             tetra.push_back(b.at(faces_voisines.at(i).at(j)));
+             tetra.push_back(sf.at(faces_voisines.at(i).at(j)));
          }
+<<<<<<< HEAD
          res = calculerBarycentreTetra(tetra);
          bt.push_back(res);
          tetra.empty();
@@ -361,14 +387,54 @@ Mesh Mesh::subdivide() const
         //mis à jour des faces
         vector< vector< unsigned int > > nouvellesFaces;
 
+=======
+         sa.push_back(calculerBarycentreTetra(tetra));
+         tetra.clear();
+>>>>>>> 06854ca6dba0f6a3476c8b2e85fb5fe343c7caa8
      }
+     cout << "debut deplacement"<<endl;
 
     //Deplacement de S
+     vector <vec3 > sommets;
+     for(int i=0;i<vertices.size();i++){
+         sommets.push_back(deplacement(i,vertices.at(i),sf,sa));
 
+     }
+     cout << "fin deplacement"<<endl;
+
+<<<<<<< HEAD
 
 
 //    deplacement();
+=======
+>>>>>>> 06854ca6dba0f6a3476c8b2e85fb5fe343c7caa8
     //Formation des faces
+
+     for(int i=0;i<sommets.size();i++){
+        cout << sommets.at(i).x <<" "<<sommets.at(i).y <<" "<<sommets.at(i).z <<endl;
+     }
+     cout<<"FIN SOMMETS"<<endl;
+
+    vector<unsigned int > v;
+    for(int i=0;i<sommets.size();i++){
+        output.vertices.push_back(sommets.at(i));//s
+        output.vertices.push_back(sa.at(i));//sai
+        output.vertices.push_back(sf.at(i)); //sfi
+        output. vertices.push_back(sa.at((i+1)%sommets.size())); //sai+1
+        v.push_back((unsigned int)((4*i)+1));
+        v.push_back((unsigned int)((4*i)+2));
+        v.push_back((unsigned int)((4*i)+3));
+        v.push_back((unsigned int)((4*i)+4));
+        output.faces.push_back(v); //f s sai sfi sai+1
+        v.clear();
+    }
+    cout << "fin formation faces"<<endl;
+    for(int i=0;i<output.vertices.size();i++){
+        cout << i<<endl;
+       cout << output.vertices.at(i).x << " "<< output.vertices.at(i).y << " "<< output.vertices.at(i).z << endl;
+
+    }
+
 
     //=======================================================
     //
@@ -378,6 +444,7 @@ Mesh Mesh::subdivide() const
 
 
     
+<<<<<<< HEAD
 //    output = *this;     // place holder : current mesh copy
 //    vector<vec3> listeres;
 //    for(int i=0;i<vertices.size();i++){
@@ -389,6 +456,10 @@ Mesh Mesh::subdivide() const
 //    output.vertices=listeres;
 
     
+=======
+   // output = *this;     // place holder : current mesh copy
+
+>>>>>>> 06854ca6dba0f6a3476c8b2e85fb5fe343c7caa8
     return output;
 }
 
