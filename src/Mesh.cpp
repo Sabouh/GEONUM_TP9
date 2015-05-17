@@ -225,6 +225,9 @@ vec3 Mesh::calculerBarycentreTetra(vector< vec3 > f) const{
     return barycentre;
 }
 
+
+
+
 vec3 Mesh::deplacement(unsigned int sommet ,vec3 S,vector<vec3> listefsi,vector<vec3>listeSai) const {
 
        unsigned int n= vertices.size();
@@ -262,6 +265,52 @@ vec3 Mesh::deplacement(unsigned int sommet ,vec3 S,vector<vec3> listefsi,vector<
 
         return newS;
 }
+//deplacement qui renvoi 3 vecteur qui sont :
+// le barycentre de sfi
+//le barycentre sai
+//le deplacement de s
+// qui font tous les maintenent partis de sommets
+vector<vec3> Mesh::deplacementVector(unsigned int sommet ,vec3 S,vector<vec3> listefsi,vector<vec3>listeSai) const {
+       vector<vec3> NewSommet;
+       unsigned int n= vertices.size();
+      vector< Edge > edges= get_edges();
+       //
+      vector< vector< unsigned int > > edgesAdjacentes=get_vertex_edges (edges) ;
+
+      vector< vector< unsigned int > >  facesAdjacentes = get_vertex_faces();
+
+     vector< Edge >  aretes=get_edges();
+     vector< vector<unsigned int> > voisins=get_neighborhoods();
+
+        vector< vector< unsigned int > > listeEdge=get_vertex_edges(voisins,aretes);
+        vector<unsigned int> face=facesAdjacentes.at(sommet);
+        vector<vec3> listSFI;
+        for(int j=0;j<face.size();j++){
+            int ii=(int)face.at(j);
+            listSFI.push_back(listefsi.at(ii));
+        }
+            vec3 resultF=calculerBarycentreTetra(listSFI);
+            NewSommet.push_back(resultF);
+
+
+        vector< unsigned int > listEd=listeEdge.at(sommet);
+        vec3 resultA=calculerBarycentreTetra(listeSai);
+        NewSommet.push_back(resultA);
+        //calcul de A*2
+
+        vec3 resultA_2=vec3(resultA.x*2,resultA.y*2,resultA.z*2);
+        //calcul de (n-3)*S
+        vec3 S_n_1=vec3(S.x*(n-1),S.y*(n-1),S.z*(n-1));
+        //calcul du résultat snouv
+        float v1=(resultF.x+2*resultA_2.x+S_n_1.x)/2;
+        float v2=(resultF.y+2*resultA_2.y+S_n_1.y)/2;
+        float v3=(resultF.z+2*resultA_2.z+S_n_1.z)/2;
+        vec3 newS=vec3(v1,v2,v3);
+        NewSommet.push_back(resultF);
+
+        return NewSommet;
+}
+
 
 
 Mesh Mesh::subdivide() const
@@ -280,6 +329,8 @@ Mesh Mesh::subdivide() const
      vector<vec3 > tetra;
      vector<vec3 > bt;
      vec3 res;
+     //nouveau liste de sommets pour output
+     vector<vec3> SommetsDeplaces;
 
      for(int i=0;i<faces_voisines.size();i++){
          /*Extremites de l'arête*/
@@ -292,9 +343,29 @@ Mesh Mesh::subdivide() const
          res = calculerBarycentreTetra(tetra);
          bt.push_back(res);
          tetra.empty();
+
+         for(int j=0;j<output.vertices.size();j++){
+             //on ajoute les anciens sommets
+             SommetsDeplaces.push_back(output.vertices.at(i));
+             //puis on rajoute les nouveaux
+             vector<vec3> vecteur =deplacementVector(i,output.vertices.at(i),tetra,bt);
+             //ajout de barycentre de sfi
+             SommetsDeplaces.push_back(vecteur.at(0));
+             //ajout de barycentre de sai
+             SommetsDeplaces.push_back(vecteur.at(1));
+             //ajout de depacement di
+             SommetsDeplaces.push_back(deplacement(i,output.vertices.at(i),tetra,bt));
+         }
+        output.vertices=SommetsDeplaces;
+
+        //mis à jour des faces
+        vector< vector< unsigned int > > nouvellesFaces;
+
      }
 
     //Deplacement de S
+
+
 
 //    deplacement();
     //Formation des faces
@@ -307,18 +378,20 @@ Mesh Mesh::subdivide() const
 
 
     
-    output = *this;     // place holder : current mesh copy
-    vector<vec3> listeres;
-    for(int i=0;i<vertices.size();i++){
-       listeres.push_back(deplacement(i,vertices.at(i),bt,tetra));
-    }
+//    output = *this;     // place holder : current mesh copy
+//    vector<vec3> listeres;
+//    for(int i=0;i<vertices.size();i++){
+//       listeres.push_back(deplacement(i,vertices.at(i),bt,tetra));
+//    }
     
 
-    //vertices=listeres;
-    output.vertices=listeres;
+//    //vertices=listeres;
+//    output.vertices=listeres;
+
     
     return output;
 }
+
 
 
 vector< vector<unsigned int> > Mesh::get_neighborhoods() const
