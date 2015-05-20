@@ -65,7 +65,12 @@ public:
   Mesh subdivide() const;   // Computes the Catmull-Clark subdivision of the mesh
   vec3 calculerBarycentreFace(vector< unsigned int > f) const; //Calcul Barycentre des sommets d'une face
   vec3 calculerBarycentreTetra(vector< vec3 > f) const; // Calcul Barycentre tetraedre
-  vec3 deplacement(unsigned int sommet , vec3 S, vector<vec3> listefsi, vector<vec3>listeSai)const; // Deplacement de S
+//<<<<<<< HEAD
+//  vector<vec3> deplacementVector(unsigned int sommet , vec3 S,vector<vec3> listefsi,vector<vec3>listeSai)const;
+  vec3 deplacement(unsigned int sommet , vec3 S,vector<vec3> listefsi,vector<vec3>listeSai)const; // Deplacement de S
+//=======
+//  vec3 deplacement(unsigned int sommet , vec3 S, vector<vec3> listefsi, vector<vec3>listeSai)const; // Deplacement de S
+//>>>>>>> 06854ca6dba0f6a3476c8b2e85fb5fe343c7caa8
 };
 
 

@@ -226,6 +226,7 @@ vec3 Mesh::calculerBarycentreTetra(vector< vec3 > f) const{
 }
 
 
+
 vec3 Mesh::deplacement(unsigned int sommet ,vec3 S,vector<vec3> listefsi,vector<vec3>listeSai) const {
 
        unsigned int n= vertices.size();
@@ -265,6 +266,7 @@ vec3 Mesh::deplacement(unsigned int sommet ,vec3 S,vector<vec3> listefsi,vector<
 }
 
 
+
 Mesh Mesh::subdivide() const
 {
     Mesh output;
@@ -295,71 +297,10 @@ Mesh Mesh::subdivide() const
      vector<Edge > aretes = get_edges();
      vector <vector < unsigned int > > faces_voisines = get_edge_faces(aretes);
      vector<vec3 > tetra;
-     vector<vec3 > sa;
-
-
-     cout << "debut SA"<<endl;
-     for(int i=0;i<faces_voisines.size();i++){
-         /*Extremites de l'arête*/
-         tetra.push_back(get_vertex(aretes.at(i).m_i0));
-         tetra.push_back(get_vertex(aretes.at(i).m_i1));
-         for(int j=0;j<faces_voisines.at(i).size();j++){
-             /*faces adjacentes*/
-             tetra.push_back(sf.at(faces_voisines.at(i).at(j)));
-         }
-         sa.push_back(calculerBarycentreTetra(tetra));
-         tetra.clear();
-     }
-     cout << "debut deplacement"<<endl;
-
-    //Deplacement de S
-     vector <vec3 > sommets;
-     for(int i=0;i<vertices.size();i++){
-         sommets.push_back(deplacement(i,vertices.at(i),sf,sa));
-
-     }
-     cout << "fin deplacement"<<endl;
-
-    //Formation des faces
-
-     for(int i=0;i<sommets.size();i++){
-        cout << sommets.at(i).x <<" "<<sommets.at(i).y <<" "<<sommets.at(i).z <<endl;
-     }
-     cout<<"FIN SOMMETS"<<endl;
-
-    vector<unsigned int > v;
-    for(int i=0;i<sommets.size();i++){
-        output.vertices.push_back(sommets.at(i));//s
-        output.vertices.push_back(sa.at(i));//sai
-        output.vertices.push_back(sf.at(i)); //sfi
-        output. vertices.push_back(sa.at((i+1)%sommets.size())); //sai+1
-        v.push_back((unsigned int)((4*i)+1));
-        v.push_back((unsigned int)((4*i)+2));
-        v.push_back((unsigned int)((4*i)+3));
-        v.push_back((unsigned int)((4*i)+4));
-        output.faces.push_back(v); //f s sai sfi sai+1
-        v.clear();
-    }
-    cout << "fin formation faces"<<endl;
-    for(int i=0;i<output.vertices.size();i++){
-        cout << i<<endl;
-       cout << output.vertices.at(i).x << " "<< output.vertices.at(i).y << " "<< output.vertices.at(i).z << endl;
-
-    }
-
-
-    //=======================================================
-    //
-    // TODO : implémenter le schema de subdivision de Catmull-Clark
-    //
-    //=======================================================
-
-
-    
-   // output = *this;     // place holder : current mesh copy
 
     return output;
 }
+
 
 
 vector< vector<unsigned int> > Mesh::get_neighborhoods() const
